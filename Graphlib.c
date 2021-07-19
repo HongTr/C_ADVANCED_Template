@@ -272,35 +272,26 @@ void dropGraph(Graph graph){
 }
 
 int connect(Graph graph, int v1, int v2){
-    //create "visited" list, make all of them FALSE
-     int* visited = (int*)calloc(100, sizeof(int));
-     int way[100], index = 0;
-     int last;
-    //initialize a new stack q
+    int* visited = (int*)calloc(100, sizeof(int));
+    int way[100], index = 0;
+    int last;
     Dllist q = new_dllist();
-    //Push v1 to 
     dll_prepend(q, new_jval_i(v1));
-        while(!dll_empty(q)){
-        //let x is pop of q
+    while(!dll_empty(q)){
         Dllist a =  dll_first(q);
         int x = jval_i(a->val);
         dll_delete_node(a);
-
-        if (!visited[x] && x != v2){               // if x is not visited
+        if (!visited[x] && x != v2){               
             way[index] = x; index++;
-            //printf("%d ", x);           // then print x
-            visited[x] = 1;             // and change x is visited
-            int* list_adj = (int*)malloc(100*sizeof(int));              // create list of x'adjacent
+            visited[x] = 1;             
+            int* list_adj = (int*)malloc(100*sizeof(int));              
             int i = getAdjacentVertices(graph, x, list_adj);
-            //traverse x'adjacent
             for (int j = 0; j < i; j++){
-                if (!visited[list_adj[j]]) //if list_adj[j] is not visited
-                    dll_prepend(q, new_jval_i(list_adj[j]));     //enqueue list_adj[j]
-                }
+                if (!visited[list_adj[j]]) dll_prepend(q, new_jval_i(list_adj[j]));     
+            }
         }
         else if (x == v2){
             way[index] = x;
-            //printf("%d ", x);
             break;
         }
     }
@@ -309,29 +300,22 @@ int connect(Graph graph, int v1, int v2){
     return 1;
 }
 void DFS(Graph graph, int v1, int v2){
-    //create "visited" list, make all of them FALSE
-     int* visited = (int*)calloc(100, sizeof(int));
-    //initialize a new queue q
+    int* visited = (int*)calloc(100, sizeof(int));
     Dllist q = new_dllist();
-    //enqueue v1 to 
     dll_prepend(q, new_jval_i(v1));
-        while(!dll_empty(q)){
-        //let x is dequeue of q
+    while(!dll_empty(q)){
         Dllist a =  dll_first(q);
         int x = jval_i(a->val);
         dll_delete_node(a);
-
-        if (!visited[x] && x != v2){               // if x is not visited
-            printf("%d ", x);           // then print x
-            visited[x] = 1;             // and change x is visited
-            int* list_adj = (int*)malloc(100*sizeof(int));              // create list of x'adjacent
+        if (!visited[x] && x != v2){              
+            printf("%d ", x);           
+            visited[x] = 1;             
+            int* list_adj = (int*)malloc(100*sizeof(int));              
             int i = getAdjacentVertices(graph, x, list_adj);
-            //traverse x'adjacent
             for (int j = 0; j < i; j++){
-                if (!visited[list_adj[j]]) //if list_adj[j] is not visited
-                    dll_prepend(q, new_jval_i(list_adj[j]));     //enqueue list_adj[j]
-                }
+                if (!visited[list_adj[j]]) dll_prepend(q, new_jval_i(list_adj[j]));   
             }
+        }
         else if (x == v2){
             printf("%d ", x);
             break;
@@ -339,30 +323,23 @@ void DFS(Graph graph, int v1, int v2){
     }
 }
 void BFS(Graph graph, int v1, int v2){
-    //create "visited" list, make all of them FALSE
-     int* visited = (int*)calloc(100, sizeof(int));
-    //initialize a new queue q
+    int* visited = (int*)calloc(100, sizeof(int));
     Dllist q = new_dllist();
-    //enqueue v1 to q
     dll_append(q, new_jval_i(v1));
-        while(!dll_empty(q)){
-
-        //let x is the first element of q
+    while(!dll_empty(q)){
         Dllist a =  dll_first(q);
         int x = jval_i(a->val);
         dll_delete_node(a);
 
-        if (!visited[x] && x != v2){    // if x is not visited
-            printf("%d ", x);           // then print x
-            visited[x] = 1;             // and change x is visited
-            int* list_adj = (int*)malloc(100*sizeof(int));              // create list of x'adjacent
+        if (!visited[x] && x != v2){    
+            printf("%d ", x);           
+            visited[x] = 1;             
+            int* list_adj = (int*)malloc(100*sizeof(int));              
             int i = getAdjacentVertices(graph, x, list_adj);
-            //traverse x'adjacent
             for (int j = 0; j < i; j++){
-                if (!visited[list_adj[j]]) //if list_adj[j] is not visited
-                    dll_append(q, new_jval_i(list_adj[j]));     //enqueue list_adj[j]
-                }
+                if (!visited[list_adj[j]])  dll_append(q, new_jval_i(list_adj[j]));
             }
+        }
         else if (x == v2){
             printf("%d ", x);
             break;
