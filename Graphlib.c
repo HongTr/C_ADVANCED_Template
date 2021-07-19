@@ -98,21 +98,12 @@ int outdegree(Graph graph, int v, int* output)
     return total;
 }
 
-int getAdjacentVertices(Graph graph, int v, int* output){ //Use only directed Graph
-    int output1[100]; 
-    int output2[100];
-    int amount1, amount2;
-    amount1 = indegree(graph, v, output1);
-    amount2 = outdegree(graph, v, output2);
-    for(int i = amount1, j=0; i<(amount1+amount2); i++, j++)
-    {
-        output1[i] = output2[j];
-    }
-    for(int i=0; i<(amount1+ amount2); i++)
-    {
-        output[i] = output1[i];
-    }
-    return amount1+amount2;
+int getAdjacentVertices(Graph graph, int v, int* output){ //Duplicate "output" when dealing with Undirected Graph
+    int temp[100], t, s;
+    s = indegree(graph, v, output);
+    t = outdegree(graph, v, temp);
+    for (int i = 0; i < t; i++) output[s+i] = temp[i];
+    return s + t;
 }
 
 int NumberVertex(Graph graph){
@@ -200,65 +191,57 @@ Queue Dequeue(Queue queue, int* output){
 
     return queue;
 }
+float dijkstra(Graph graph, int start, int stop, int* path, int* length){
+    int number = NumberVertex(graph)+1;
 
-float shortestPath(Graph graph, int start, int stop, int* path, int* length){
-    // call stuffs
-    int u, count;
-    int output[NumberVertex(graph)];
-    int tmp[1000], previous[1000];
-    int visited[NumberVertex(graph)+1];
-    for(int i=0; i<NumberVertex(graph)+1; i++) visited[i]=0;
+    int prev[number], t[number];
+    //visited array
+    int* visited = (int*)calloc(number, sizeof(int));
+    visited[start] = 1;
 
-    //path
-    *length = 0;
-    for(int i=0; i<NumberVertex(graph)+1; i++) *(path + i) = -1;
-
-    // set distance
-    float distance[NumberVertex(graph)+1];
-    for(int i=0; i<NumberVertex(graph)+1; i++) distance[i] = INFINITIVE_VALUE;
+    //distance from start to u array
+    double distance[number];
+    for (int i = 0; i < number; i++) distance[i] = INFINITIVE_VALUE;
     distance[start] = 0;
-    previous[start] = start;
 
-    //create priority queue
-    Queue p_queue = createQueue();
-    p_queue = Enqueue(p_queue, start, distance[start]);
+    //path and length
 
-    //Dikjstra
-    while(!IsQueueEmpty(p_queue))
-    {
-        p_queue = Dequeue(p_queue, &u);
-        *(visited + u) = 1;
+    // Initialize Priority Queue
+    Queue q = createQueue();
+    q = Enqueue(q, start, distance[start]);
 
-        count = outdegree(graph, u, output);
-        for(int i=0; i<count; i++)
-        {
-            if( *(visited + output[i]) == 0 )
-            {
-                if(distance[output[i]] > distance[u] + getEdgeValue(graph, u, output[i]))
-                { 
-                    distance[output[i]] = distance[u] + getEdgeValue(graph, u, output[i]);
-                    previous[output[i]] = u;
-                    p_queue = Enqueue(p_queue, output[i], distance[output[i]]); 
+
+    int n; //number of adjacent
+    int* output = (int*)malloc(number*sizeof(int)); //list of outdgree
+    int deq; //record dequeue of q
+    //Dijkstra
+    while(!IsQueueEmpty(q)){
+        q = Dequeue(q, &deq);
+        n = getAdjacentVertices(graph, deq, output);
+        visited[deq] = 1;
+        for (int i = 0; i < n; i++){
+            if (*(visited + output[i]) == 0){
+                int temp = distance[deq] + getEdgeValue(graph, deq, output[i]);
+                if (temp < distance[output[i]]){
+                    distance[output[i]] = temp;
+                    prev[output[i]] = deq;
+                    q = Enqueue(q, output[i], distance[output[i]]);
                 }
             }
         }
     }
-    float total = distance[stop]; 
-    int n, t = stop, s = start, do_dai=0;
-    if (total != INFINITIVE_VALUE)
-    {
-        tmp[0] = t;
-        n = 1;              
-        while (t != s)
-        {
-            t = previous[t];
-            tmp[n++] = t;
+    int dis = distance[stop];
+    if(dis != INFINITIVE_VALUE){
+        t[0] = stop;
+        int a = 1;
+        while(stop != start){
+            stop = prev[stop];
+            t[a++] = stop;
         }
-        for (int i=n-1; i>=0; i--)
-            path[n-i-1] = tmp[i];
-        *length = n;                   
+        for (int i = a-1; i>=0; i--) path[a-i-1] = t[i];
+        *length = a;
     }
-    return distance[stop];
+    return dis;
 }
 
 void dropGraph(Graph graph){
@@ -295,9 +278,36 @@ int connect(Graph graph, int v1, int v2){
             break;
         }
     }
-    if (v2 == -1 && index != NumberVertex(graph)) return 0;
     if (way[index] != v2) return 0;
     return 1;
+}
+int connect_full(Graph graph){
+    int* visited = (int*)calloc(100, sizeof(int));
+    int way[100], index = 0, last;
+    //choose randomly one vertex from the graph
+    JRB trav; int temp;
+    jrb_traverse(trav, graph.vertices){
+        temp = jval_i(trav->key);
+        break;
+    }
+    //DFS with random vertex "temp", check whether the number of reachable vetices from "temp" is equal to number of Vertices of Graph
+    Dllist q = new_dllist();
+    dll_prepend(q, (Jval)temp);
+    while(!dll_empty(q)){
+        Dllist a =  dll_first(q);
+        int x = jval_i(a->val);
+        dll_delete_node(a);
+        if (!visited[x]){               
+            way[index] = x; index++;
+            visited[x] = 1;             
+            int* list_adj = (int*)malloc(100*sizeof(int));              
+            int i = getAdjacentVertices(graph, x, list_adj);
+            for (int j = 0; j < i; j++){
+                if (!visited[list_adj[j]]) dll_prepend(q, new_jval_i(list_adj[j]));     
+            }
+        }
+    }
+    return (index != NumberVertex(graph))? 0 : 1;
 }
 void DFS(Graph graph, int v1, int v2){
     int* visited = (int*)calloc(100, sizeof(int));

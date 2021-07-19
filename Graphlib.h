@@ -32,10 +32,12 @@ int NumberVertex(Graph graph);
 int DAG(Graph graph);
 float getEdgeValue(Graph graph, int v1, int v2);
 void dropGraph(Graph graph);
-float shortestPath(Graph graph, int start, int stop, int* path, int* length);
+//float shortestPath(Graph graph, int start, int stop, int* path, int* length);
+float dijkstra(Graph graph, int start, int stop, int* path, int* length);
 void DFS(Graph graph, int start, int stop);
 void BFS(Graph graph, int v1, int v2);
 int connect(Graph graph, int v1, int v2);
+int connect_full(Graph graph);
 //P_Queue
 Queue createQueue();
 int IsQueueEmpty(Queue queue);
