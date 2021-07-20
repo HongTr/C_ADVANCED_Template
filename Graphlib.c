@@ -282,32 +282,31 @@ int connect(Graph graph, int v1, int v2){
     return 1;
 }
 int connect_full(Graph graph){
+    int flag = 0;
     int* visited = (int*)calloc(100, sizeof(int));
     int way[100], index = 0, last;
-    //choose randomly one vertex from the graph
-    JRB trav; int temp;
-    jrb_traverse(trav, graph.vertices){
-        temp = jval_i(trav->key);
-        break;
-    }
-    //DFS with random vertex "temp", check whether the number of reachable vetices from "temp" is equal to number of Vertices of Graph
-    Dllist q = new_dllist();
-    dll_prepend(q, (Jval)temp);
-    while(!dll_empty(q)){
-        Dllist a =  dll_first(q);
-        int x = jval_i(a->val);
-        dll_delete_node(a);
-        if (!visited[x]){               
-            way[index] = x; index++;
-            visited[x] = 1;             
-            int* list_adj = (int*)malloc(100*sizeof(int));              
-            int i = getAdjacentVertices(graph, x, list_adj);
-            for (int j = 0; j < i; j++){
-                if (!visited[list_adj[j]]) dll_prepend(q, new_jval_i(list_adj[j]));     
+    JRB trav;
+    jrb_traverse(trav, graph.edges){
+        int temp = jval_i(trav->key);
+        Dllist q = new_dllist();
+        dll_prepend(q, (Jval)temp);
+        while(!dll_empty(q)){
+            Dllist a =  dll_first(q);
+            int x = jval_i(a->val);
+            dll_delete_node(a);
+            if (!visited[x]){               
+                way[index] = x; index++;
+                visited[x] = 1;             
+                int* list_adj = (int*)malloc(100*sizeof(int));              
+                int i = getAdjacentVertices(graph, x, list_adj);
+                for (int j = 0; j < i; j++){
+                    if (!visited[list_adj[j]]) dll_prepend(q, new_jval_i(list_adj[j]));     
+                }
             }
         }
+        if (index == NumberVertex(graph)) flag++;
     }
-    return (index != NumberVertex(graph))? 0 : 1;
+    return (flag == 0) ? 0:1;
 }
 void DFS(Graph graph, int v1, int v2){
     int* visited = (int*)calloc(100, sizeof(int));
