@@ -22,8 +22,7 @@ int main(){
         printf("Lua chon cua ban: ");
         scanf("%d", &choice);
         if (choice <= 0 || choice >= 7) printf("Nhap khong hop le!\n");
-        else if (choice == 6) printf("Ban da thoat chuong trinh\n");
-        else if (choice >=1 && choice <=5 && choice != 3){
+        else if (choice >=1 && choice <=5){
             switch(choice){
                 case 1:;
                     break;
@@ -34,6 +33,8 @@ int main(){
                 case 4:;
                     break;
                 case 5:
+                    break;
+                case 6: printf("Ban da thoat chuong trinh!\n");
                     break;
             }
         }
