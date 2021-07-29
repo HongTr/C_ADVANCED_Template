@@ -191,57 +191,93 @@ Queue Dequeue(Queue queue, int* output){
 
     return queue;
 }
-float dijkstra(Graph graph, int start, int stop, int* path, int* length){
-    int number = NumberVertex(graph)+1;
+int dijkstra(Graph graph, int start, int stop, int* path, int* length){
+    // call stuffs
+    int num = NumberVertex(graph);
+    int u, count;
+    int output[num];
+    int tmp[1000], previous[1000];
+    int visited[num+1];
+    for(int i=0; i<num+1; i++) visited[i]=0;
 
-    int prev[number], t[number];
-    //visited array
-    int* visited = (int*)calloc(number, sizeof(int));
-    visited[start] = 1;
+    //path
+    *length = 0;
+    for(int i=0; i<num+1; i++) *(path + i) = -1;
 
-    //distance from start to u array
-    double distance[number];
-    for (int i = 0; i < number; i++) distance[i] = INFINITIVE_VALUE;
+    // set distance
+    int distance[num+1];
+    for(int i=0; i<num+1; i++) distance[i] = INFINITIVE_VALUE;
     distance[start] = 0;
+    previous[start] = start;
 
-    //path and length
+    //create priority queue
+    Queue p_queue = createQueue();
+    p_queue = Enqueue(p_queue, start, distance[start]);
 
-    // Initialize Priority Queue
-    Queue q = createQueue();
-    q = Enqueue(q, start, distance[start]);
+    //Dikjstra
+    while(!IsQueueEmpty(p_queue))
+    {
+        p_queue = Dequeue(p_queue, &u);
+        *(visited + u) = 1;
 
-
-    int n; //number of adjacent
-    int* output = (int*)malloc(number*sizeof(int)); //list of outdgree
-    int deq; //record dequeue of q
-    //Dijkstra
-    while(!IsQueueEmpty(q)){
-        q = Dequeue(q, &deq);
-        n = getAdjacentVertices(graph, deq, output);
-        visited[deq] = 1;
-        for (int i = 0; i < n; i++){
-            if (*(visited + output[i]) == 0){
-                int temp = distance[deq] + getEdgeValue(graph, deq, output[i]);
-                if (temp < distance[output[i]]){
-                    distance[output[i]] = temp;
-                    prev[output[i]] = deq;
-                    q = Enqueue(q, output[i], distance[output[i]]);
+        count = outdegree(graph, u, output);
+        for(int i=0; i<count; i++)
+        {
+            if( *(visited + output[i]) == 0 )
+            {
+                if(distance[output[i]] > distance[u] + getEdgeValue(graph, u, output[i]))
+                { 
+                    distance[output[i]] = distance[u] + getEdgeValue(graph, u, output[i]);
+                    previous[output[i]] = u;
+                    p_queue = Enqueue(p_queue, output[i], distance[output[i]]); 
                 }
             }
         }
     }
-    int dis = distance[stop];
-    if(dis != INFINITIVE_VALUE){
-        t[0] = stop;
-        int a = 1;
-        while(stop != start){
-            stop = prev[stop];
-            t[a++] = stop;
+    int total = distance[stop]; 
+    int n, t = stop, s = start, do_dai=0;
+    if (total != INFINITIVE_VALUE)
+    {
+        tmp[0] = t;
+        n = 1;              
+        while (t != s)
+        {
+            t = previous[t];
+            tmp[n++] = t;
         }
-        for (int i = a-1; i>=0; i--) path[a-i-1] = t[i];
-        *length = a;
+        for (int i=n-1; i>=0; i--)
+            path[n-i-1] = tmp[i];
+        *length = n;                   
     }
-    return dis;
+    return distance[stop];
+}
+int BellmanFord(Graph graph, int start, float* distance, int* previous){
+    for(int i=1; i<=NumberVertex(graph); i++) 
+    {
+        *(distance + i) = INFINITIVE_VALUE;
+        *(previous + i) = -1; //Graph khong co dinh ID am        
+    }
+    *(distance + start) = 0;
+
+    int output[NumberVertex(graph)];
+    int count;
+    float tempDistance;
+    int path = 0;
+    for(int v=1; v<=NumberVertex(graph); v++)
+    {
+        count = outdegree(graph, v, output);
+        for(int u=0; u<count; u++)
+        {
+            tempDistance = getEdgeValue(graph, v, output[u]) + *(distance + output[u]);
+            if(tempDistance < *(distance + v))
+            {
+                *(distance + v) = tempDistance;
+                *(previous + v) = output[u];
+                path++;
+            }
+        }
+    }
+    return path;
 }
 
 void dropGraph(Graph graph){
@@ -284,9 +320,10 @@ int connect(Graph graph, int v1, int v2){
 int connect_full(Graph graph){
     int flag = 0;
     int* visited = (int*)calloc(100, sizeof(int));
-    int way[100], index = 0, last;
+    int index;
     JRB trav;
     jrb_traverse(trav, graph.edges){
+        index = 0;
         int temp = jval_i(trav->key);
         Dllist q = new_dllist();
         dll_prepend(q, (Jval)temp);
@@ -295,7 +332,7 @@ int connect_full(Graph graph){
             int x = jval_i(a->val);
             dll_delete_node(a);
             if (!visited[x]){               
-                way[index] = x; index++;
+                index++;
                 visited[x] = 1;             
                 int* list_adj = (int*)malloc(100*sizeof(int));              
                 int i = getAdjacentVertices(graph, x, list_adj);
