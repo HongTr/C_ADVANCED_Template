@@ -22,11 +22,20 @@ int main(){
         printf("Lua chon cua ban: ");
         scanf("%d", &choice);
         if (choice <= 0 || choice >= 7) printf("Nhap khong hop le!\n");
-        else if (choice >=1 && choice <=5){
+        else if (choice >=1 && choice <=6){
             switch(choice){
-                case 1:;
+                case 1:
+                    if (!flag){
+                        flag = 1;
+
+                    }
+                    else printf(" ");
                     break;
-                case 2:;
+                case 2:
+                    if (flag){
+
+                    }
+                    else printf(" ");
                     break;
                 case 3:;
                     break;
