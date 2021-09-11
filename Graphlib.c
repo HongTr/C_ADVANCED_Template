@@ -88,10 +88,10 @@ int indegree(Graph graph, int v, int* output){ //Check adjacent vertices list in
 }
 
 int outdegree(Graph graph, int v, int* output){
-    int total = 0; 
     JRB node = jrb_find_int(graph.edges, v);
-    JRB list = (JRB) jval_v(node->val);
     if(node == NULL) return 0;
+    int total = 0; 
+    JRB list = (JRB) jval_v(node->val);
     jrb_traverse(node, list){
         output[total++] = jval_i(node->key);
     } 

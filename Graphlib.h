@@ -3,14 +3,14 @@
 #include <string.h>
 #include "jrb.h"
 #include "dllist.h"
-#define INFINITIVE_VALUE 10000
+#define INFINITIVE_VALUE 10000.0
 typedef struct Graph{
     JRB edges;
     JRB vertices;
 } Graph;
 struct Queue{
     int info;
-    double priority;
+    float priority;
     struct Queue* link;
 };
 typedef struct Queue* Queue;
@@ -32,15 +32,14 @@ int NumberVertex(Graph graph);
 int DAG(Graph graph);
 float getEdgeValue(Graph graph, int v1, int v2);
 void dropGraph(Graph graph);
-int dijkstra(Graph graph, int start, int stop, int* path, int* length);
-int BellmanFord(Graph graph, int start, float* distance, int* previous);
+
+float dijkstra(Graph graph, int start, int stop, int* path, int* length);
 void DFS(Graph graph, int start, int stop);
 void BFS(Graph graph, int v1, int v2);
-int connect(Graph graph, int v1, int v2);
-int connect_full(Graph graph);
+int weak_connect(Graph graph, int v1, int v2);
 //P_Queue
 Queue createQueue();
 int IsQueueEmpty(Queue queue);
-Queue Enqueue(Queue queue, int item, double priority);
+Queue Enqueue(Queue queue, int item, float priority);
 Queue Dequeue(Queue queue, int* output);
 
